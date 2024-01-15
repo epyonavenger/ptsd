@@ -1,4 +1,4 @@
-# ptsd (PaintTool Sai Downlader)
+# ptsd (PaintTool Sai Downloader)
 
 This project is a quick and dirty script to download PaintTool Sai, and then fetch updates when they come out. It's mostly targeting version 2, but I may extend it to version 1 as well.
 
