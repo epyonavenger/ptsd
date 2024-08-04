@@ -1,5 +1,3 @@
-$Env:PTSD_DEBUG = false
-
 # Get sai2 directory from argument 1, otherwise use root drive\sai2
 if ( $args[0] -eq $null )
 {
@@ -12,6 +10,13 @@ else
 
 # Shoosh the web request progress bars.
 $ProgressPreference = 'SilentlyContinue'
+
+if ( -not ( Test-Path -Path $sai_dir ) )
+{
+    # Create install directory if it doesn't exist.
+    Write-Host "Creating $sai_dir"
+    New-Item -Path "$sai_dir" -Name "sai2" -ItemType Directory
+}
 
 # Tell the user what's up.
 Write-Host "Is sai2 up to date? " -NoNewLine
