@@ -6,7 +6,7 @@ You will still need to purchase and apply your own license files, that's outside
 
 # Installation
 
-1. Go to Code -> Download Zip
+1. Go to the blue "Code" button, click "Download Zip".
 2. Extract it somewhere. _(You can put it into your sai2 folder after it is created if you want to just run it from there in the future.)_
 
 # Usage
