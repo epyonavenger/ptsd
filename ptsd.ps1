@@ -1,5 +1,14 @@
-# Get sai2 directory from argument 1.
-$sai_dir=$args[0]
+$Env:PTSD_DEBUG = false
+
+# Get sai2 directory from argument 1, otherwise use root drive\sai2
+if ( $args[0] -eq $null )
+{
+    $sai_dir="C:\sai2"
+}
+else
+{
+    $sai_dir=$args[0]
+}
 
 # Shoosh the web request progress bars.
 $ProgressPreference = 'SilentlyContinue'
@@ -17,15 +26,20 @@ New-Item updates -ItemType Directory -ErrorAction Ignore
 Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$sai_dir\updates\history_v2.txt"
 
 # Compare the hashes to see if we're up to date.
-$history_local = Get-FileHash -Path "$sai_dir\history.txt"
-$history_v2 = Get-FileHash -Path "$sai_dir\updates\history_v2.txt"
-$updated = $history_v2.Hash -eq $history_local.Hash
+$history_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1]
+$history_v2 = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1]
+$updated = $history_v2.Value -eq $history_local.Value
 
-# Debugging results.
-#Write-Host "Local sha256:" $history_local.Hash
-#Write-Host "Remote sha256:" $history_v2.Hash
-#Write-Host "Hash Matched?:" $updated
+# Check if debug mode is on.
+if ( $Env:PTSD_DEBUG )
+{
+    # Debugging results.
+    Write-Host "Local version:" $history_local.Value
+    Write-Host "Remote version:" $history_v2.Value
+    Write-Host "Hash Matched?:" $updated
+}
 
+# Update/download logic.
 switch ($updated)
 {
     True {
