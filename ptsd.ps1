@@ -33,16 +33,16 @@ Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$
 if ( Test-Path "$sai_dir\history.txt" -PathType Leaf )
 {
     # Compare the hashes to see if we're up to date.
-    $history_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1]
-    $history_v2 = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1]
-    $updated = $history_v2.Value -eq $history_local.Value
+    $version_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
+    $version_remote = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
+    $updated = $version_remote.Value -eq $version_local.Value
 
     # Check if debug mode is on.
     if ( $Env:PTSD_DEBUG )
     {
         # Debugging results.
-        Write-Host "Local version:" $history_local.Value
-        Write-Host "Remote version:" $history_v2.Value
+        Write-Host "Local version:" $version_local.Value
+        Write-Host "Remote version:" $version_remote.Value
         Write-Host "Hash Matched?:" $updated
     }
 }
@@ -59,9 +59,8 @@ switch ($updated)
         Write-Host "No, starting update process."
         Write-Host ""
         
-        # Get new version number from history_v2.txt.
-        $new_version = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
-        $new_version_zip = 'sai2-' + "$new_version" + '-64bit-en.zip'
+        # Construct new version URL.
+        $new_version_zip = 'sai2-' + "$version_remote" + '-64bit-en.zip'
         $new_version_url = 'https://www.systemax.jp/bin/' + "$new_version_zip"
 
         # Download updated sai2 zip.
