@@ -30,18 +30,21 @@ New-Item updates -ItemType Directory -ErrorAction Ignore
 # Fetch hash of current history_v2.txt and compare to locally installed history.txt
 Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$sai_dir\updates\history_v2.txt"
 
-# Compare the hashes to see if we're up to date.
-$history_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1]
-$history_v2 = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1]
-$updated = $history_v2.Value -eq $history_local.Value
-
-# Check if debug mode is on.
-if ( $Env:PTSD_DEBUG )
+if ( Test-Path "$sai_dir\updates\history_v2.txt" -PathType Leaf )
 {
-    # Debugging results.
-    Write-Host "Local version:" $history_local.Value
-    Write-Host "Remote version:" $history_v2.Value
-    Write-Host "Hash Matched?:" $updated
+    # Compare the hashes to see if we're up to date.
+    $history_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1]
+    $history_v2 = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1]
+    $updated = $history_v2.Value -eq $history_local.Value
+
+    # Check if debug mode is on.
+    if ( $Env:PTSD_DEBUG )
+    {
+        # Debugging results.
+        Write-Host "Local version:" $history_local.Value
+        Write-Host "Remote version:" $history_v2.Value
+        Write-Host "Hash Matched?:" $updated
+    }
 }
 
 # Update/download logic.
