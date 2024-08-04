@@ -1,3 +1,5 @@
+Clear-Host
+
 # Get sai2 directory from argument 1, otherwise use root drive\sai2
 if ( $args[0] -eq $null )
 {
@@ -15,40 +17,48 @@ if ( -not ( Test-Path -Path $sai_dir ) )
 {
     # Create install directory if it doesn't exist.
     Write-Host "Creating $sai_dir"
-    New-Item -Path "$sai_dir" -Name "sai2" -ItemType Directory
+	Write-Host ""
+    New-Item -Path "$sai_dir" -ItemType Directory | Out-Null
 }
-
-# Tell the user what's up.
-Write-Host "Is sai2 up to date? " -NoNewLine
 
 # Go to sai directory so we don't hit permission blips.
 Set-Location -Path "$sai_dir"
 
-# Create Updates folder for zips.
-New-Item updates -ItemType Directory -ErrorAction Ignore
-
-# Fetch hash of current history_v2.txt and compare to locally installed history.txt
-Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$sai_dir\updates\history_v2.txt"
-
-if ( Test-Path "$sai_dir\history.txt" -PathType Leaf )
+if ( -not ( Test-Path -Path "$sai_dir\updates" ) )
 {
-    # Compare the hashes to see if we're up to date.
-    $version_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
-    $version_remote = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
-    Write-Host "Local version:" $version_local.Value
-    Write-Host "Remote version:" $version_remote.Value
+	# Create Updates folder for zips if it doesn't exist.
+	New-Item updates -ItemType Directory | Out-Null
 }
 
-# Update/download logic.
-if ( $version_remote.Value -eq $version_local.Value )
+# Fetch current history_v2.txt
+Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$sai_dir\updates\history_v2.txt"
+$version_remote = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
+
+# Get local version history.txt or set to epoch of it doesn't exit.
+if ( Test-Path "$sai_dir\history.txt" -PathType Leaf )
 {
-    Write-Host "Yes, starting sai2."
+    $version_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
+}
+else
+{
+	$version_local = "19700101"
+}
+
+Write-Host "Local version: $version_local"
+Write-Host ""
+Write-Host "Remote version: $version_remote"
+Write-Host ""
+
+# Update/download logic.
+if ( $version_remote -eq $version_local )
+{
+    Write-Host "SAI is up to date, starting SAI."
     Write-Host ""
     Start-Process -FilePath "$sai_dir\sai2.exe"
 }
 else
 {
-    Write-Host "No, starting update process."
+    Write-Host "Starting update process."
     Write-Host ""
     
     # Construct new version URL.
