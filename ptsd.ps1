@@ -30,7 +30,7 @@ New-Item updates -ItemType Directory -ErrorAction Ignore
 # Fetch hash of current history_v2.txt and compare to locally installed history.txt
 Invoke-WebRequest -Uri https://www.systemax.jp/en/sai/history_v2.txt -OutFile "$sai_dir\updates\history_v2.txt"
 
-if ( Test-Path "$sai_dir\updates\history_v2.txt" -PathType Leaf )
+if ( Test-Path "$sai_dir\history.txt" -PathType Leaf )
 {
     # Compare the hashes to see if we're up to date.
     $history_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1]
