@@ -35,42 +35,33 @@ if ( Test-Path "$sai_dir\history.txt" -PathType Leaf )
     # Compare the hashes to see if we're up to date.
     $version_local = (Get-Content -Path "$sai_dir\history.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
     $version_remote = (Get-Content -Path "$sai_dir\updates\history_v2.txt" -TotalCount 2)[-1] -replace '-','' -replace "[^0-9]"
-    $updated = $version_remote.Value -eq $version_local.Value
-
-    # Check if debug mode is on.
-    if ( $Env:PTSD_DEBUG )
-    {
-        # Debugging results.
-        Write-Host "Local version:" $version_local.Value
-        Write-Host "Remote version:" $version_remote.Value
-        Write-Host "Hash Matched?:" $updated
-    }
+    Write-Host "Local version:" $version_local.Value
+    Write-Host "Remote version:" $version_remote.Value
 }
 
 # Update/download logic.
-switch ($updated)
+if ( $version_remote.Value -eq $version_local.Value )
 {
-    True {
-        Write-Host "Yes, starting sai2."
-        Write-Host ""
-        Start-Process -FilePath "$sai_dir\sai2.exe"
-    }
-    False {
-        Write-Host "No, starting update process."
-        Write-Host ""
-        
-        # Construct new version URL.
-        $new_version_zip = 'sai2-' + "$version_remote" + '-64bit-en.zip'
-        $new_version_url = 'https://www.systemax.jp/bin/' + "$new_version_zip"
+    Write-Host "Yes, starting sai2."
+    Write-Host ""
+    Start-Process -FilePath "$sai_dir\sai2.exe"
+}
+else
+{
+    Write-Host "No, starting update process."
+    Write-Host ""
+    
+    # Construct new version URL.
+    $new_version_zip = 'sai2-' + "$version_remote" + '-64bit-en.zip'
+    $new_version_url = 'https://www.systemax.jp/bin/' + "$new_version_zip"
 
-        # Download updated sai2 zip.
-        Invoke-WebRequest -Uri "$new_version_url" -OutFile "$sai_dir\updates\$new_version_zip"
+    # Download updated sai2 zip.
+    Invoke-WebRequest -Uri "$new_version_url" -OutFile "$sai_dir\updates\$new_version_zip"
 
-        # Expand zip into place.
-        Expand-Archive -Path "$sai_dir\updates\$new_version_zip" -DestinationPath "$sai_dir" -Force
+    # Expand zip into place.
+    Expand-Archive -Path "$sai_dir\updates\$new_version_zip" -DestinationPath "$sai_dir" -Force
 
-        Write-Host "Starting updated sai2."
-        Write-Host ""
-        Start-Process -FilePath "$sai_dir\sai2.exe"
-    }
+    Write-Host "Starting updated sai2."
+    Write-Host ""
+    Start-Process -FilePath "$sai_dir\sai2.exe"
 }
